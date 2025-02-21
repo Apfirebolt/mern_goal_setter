@@ -1,0 +1,39 @@
+{
+  "name": "mern_goal_setter",
+  "version": "1.0.0",
+  "description": "A MERN application to set goals",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon backend/server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Apfirebolt/mean_goal_setter.git"
+  },
+  "keywords": [
+    "React",
+    "Express",
+    "MongoDB"
+  ],
+  "dependencies": {
+    "bcryptjs": "^3.0.2",
+    "cookie-parser": "^1.4.7",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.10.1",
+    "multer": "^1.4.5-lts.1"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2",
+    "nodemon": "^3.1.9"
+  },
+  "author": "APFirebolt",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Apfirebolt/mean_goal_setter/issues"
+  },
+  "homepage": "https://github.com/Apfirebolt/mean_goal_setter#readme"
+}
