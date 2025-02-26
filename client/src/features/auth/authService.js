@@ -4,7 +4,7 @@ import { toast } from "react-toastify";
 // Register user
 const register = async (userData) => {
   try {
-    const response = await axiosInstance.post("register", userData);
+    const response = await axiosInstance.post("users", userData);
 
     if (response.data) {
       localStorage.setItem("user", JSON.stringify(response.data));
@@ -31,7 +31,7 @@ const register = async (userData) => {
 // Login user
 const login = async (userData) => {
   try {
-    const response = await axiosInstance.post("login", userData);
+    const response = await axiosInstance.post("users/login", userData);
 
     if (response.data) {
       localStorage.setItem("user", JSON.stringify(response.data));

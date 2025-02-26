@@ -1,26 +1,42 @@
-import { useState } from "react";
+import { useEffect } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import { register as registerUser, reset } from "../features/auth/authSlice";
 import { Container, TextField, Button, Typography, Box } from "@mui/material";
 
 const Register = () => {
-  const [formData, setFormData] = useState({
-    username: "",
-    email: "",
-    password: "",
-  });
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
-  };
+  const { user, isError, isSuccess, message } = useSelector(
+    (state) => state.auth
+  );
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm();
+
+  const onSubmit = (data) => {
     // Add validation and submit logic here
-    console.log(formData);
+    console.log(data);
+    dispatch(registerUser(data));
   };
+
+  useEffect(() => {
+    if (isError) {
+      console.error(message);
+    }
+
+    // Redirect when registered
+    if (isSuccess || user) {
+      navigate('/');
+    }
+
+    dispatch(reset());
+  }, [isError, isSuccess, user, message, navigate, dispatch]);
 
   return (
     <Container maxWidth="sm">
@@ -28,35 +44,35 @@ const Register = () => {
         <Typography variant="h4" component="h1" gutterBottom>
           Register
         </Typography>
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit(onSubmit)}>
           <TextField
             label="Username"
             name="username"
-            value={formData.username}
-            onChange={handleChange}
+            {...register("username", { required: "Username is required" })}
+            error={!!errors.username}
+            helperText={errors.username ? errors.username.message : ""}
             fullWidth
             margin="normal"
-            required
           />
           <TextField
             label="Email"
             name="email"
             type="email"
-            value={formData.email}
-            onChange={handleChange}
+            {...register("email", { required: "Email is required" })}
+            error={!!errors.email}
+            helperText={errors.email ? errors.email.message : ""}
             fullWidth
             margin="normal"
-            required
           />
           <TextField
             label="Password"
             name="password"
             type="password"
-            value={formData.password}
-            onChange={handleChange}
+            {...register("password", { required: "Password is required" })}
+            error={!!errors.password}
+            helperText={errors.password ? errors.password.message : ""}
             fullWidth
             margin="normal"
-            required
           />
           <Button
             type="submit"
