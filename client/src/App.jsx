@@ -6,6 +6,8 @@ import HomePage from "./screens/Home";
 
 // lazy imports for code splitting
 const About = lazy(() => import("./screens/About"));
+const Login = lazy(() => import("./screens/Login"));
+const Register = lazy(() => import("./screens/Register"));
 
 const App = () => {
   return (
@@ -14,6 +16,8 @@ const App = () => {
         <Routes>
           <Route path="/" element={<HomePage/>} exact />
           <Route path="/about" element={<About/>} />
+          <Route path="/login" element={<Login/>} />
+          <Route path="/register" element={<Register/>} />
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       <Footer />
