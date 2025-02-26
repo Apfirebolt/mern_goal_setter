@@ -13,14 +13,12 @@ const GoalForm = (props) => {
 
   const onSubmit = (data) => {
     // Add validation and submit logic here
-    console.log(data);
     createGoal(data);
-    // dispatch(createGoal(data));
   };
 
   return (
     <Container maxWidth="sm">
-      <Box sx={{ mt: 8 }}>
+      <Box sx={{ mt: 2 }}>
         <Typography variant="h4" component="h1" gutterBottom>
           Create Goal
         </Typography>
@@ -74,25 +72,24 @@ const GoalForm = (props) => {
             fullWidth
             margin="normal"
           />
-          <Button
-            type="submit"
-            variant="contained"
-            color="primary"
-            fullWidth
-            sx={{ mt: 2 }}
-          >
-            Create Goal
-          </Button>
-          <Button
-            type="button"
-            variant="outlined"
-            color="secondary"
-            fullWidth
-            sx={{ mt: 2 }}
-            onClick={() => closeForm()}
-          >
-            Cancel
-          </Button>
+          <Container sx={{ display: "flex", justifyContent: "center" }}>
+            <Button
+              type="submit"
+              variant="contained"
+              color="primary"
+              sx={{ mt: 2, mr: 2 }}
+            >
+              Create
+            </Button>
+            <Button
+              variant="contained"
+              color="secondary"
+              sx={{ mt: 2 }}
+              onClick={closeForm}
+            >
+              Cancel
+            </Button>
+          </Container>
         </form>
       </Box>
     </Container>

@@ -21,7 +21,6 @@ const Login = () => {
 
   const onSubmit = (data) => {
     // Add validation and submit logic here
-    console.log(data);
     dispatch(login(data));
   };
 

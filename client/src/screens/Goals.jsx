@@ -31,8 +31,8 @@ const Goals = () => {
   };
 
   const createGoalUtil = async (data) => {
-    dispatch(createGoal(data));
-    dispatch(getGoals());
+    await dispatch(createGoal(data));
+    await dispatch(getGoals());
     handleClose();
   }
 
@@ -53,7 +53,7 @@ const Goals = () => {
       <Box sx={{ flexGrow: 1, mt: 2 }}>
         <Grid container spacing={2}>
           {goals.map((goal) => (
-            <Grid item xs={12} sm={6} md={4} key={goal.id}>
+            <Grid item xs={12} sm={6} md={4} key={goal._id}>
               <Box sx={{ p: 2, border: 1, borderColor: 'divider', borderRadius: 1 }}>
                 <Typography variant="h6">{goal.title}</Typography>
                 <Typography>{goal.description}</Typography>
