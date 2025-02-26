@@ -6,11 +6,9 @@ import {
   Container,
   Typography,
   Box,
-  List,
-  ListItem,
-  ListItemText,
   Modal,
   Button,
+  Grid
 } from "@mui/material";
 
 const Goals = () => {
@@ -32,13 +30,11 @@ const Goals = () => {
     p: 4,
   };
 
-  const createGoalUtil = (data) => {
+  const createGoalUtil = async (data) => {
     dispatch(createGoal(data));
     dispatch(getGoals());
     handleClose();
   }
-
-  console.log(goals);
 
   useEffect(() => {
     dispatch(getGoals());
@@ -46,7 +42,7 @@ const Goals = () => {
 
   return (
     <Container>
-      <Box>
+      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" , marginTop: 2}}>
         <Typography variant="h4" component="h1" gutterBottom>
           Goals
         </Typography>
@@ -54,13 +50,27 @@ const Goals = () => {
           Add Goal
         </Button>
       </Box>
-      <List>
-        {goals.map((goal) => (
-          <ListItem key={goal._id}>
-            <ListItemText primary={goal.title} secondary={goal.description} />
-          </ListItem>
-        ))}
-      </List>
+      <Box sx={{ flexGrow: 1, mt: 2 }}>
+        <Grid container spacing={2}>
+          {goals.map((goal) => (
+            <Grid item xs={12} sm={6} md={4} key={goal.id}>
+              <Box sx={{ p: 2, border: 1, borderColor: 'divider', borderRadius: 1 }}>
+                <Typography variant="h6">{goal.title}</Typography>
+                <Typography>{goal.description}</Typography>
+                <Typography variant="body2" color="textSecondary">
+                  Start Date: {new Date(goal.startDate).toLocaleDateString()}
+                </Typography>
+                <Typography variant="body2" color="textSecondary">
+                  End Date: {new Date(goal.endDate).toLocaleDateString()}
+                </Typography>
+                <Typography variant="body2" color="textSecondary">
+                  Category: {goal.category}
+                </Typography>
+              </Box>
+            </Grid>
+          ))}
+        </Grid>
+      </Box>
       <Modal open={open} onClose={handleClose}>
         <Box sx={style}>
           <GoalForm createGoal={createGoalUtil} closeForm={handleClose} />
