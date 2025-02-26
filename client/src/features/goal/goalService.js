@@ -1,7 +1,6 @@
 import axiosInstance from "../../plugins/interceptor";
 import { toast } from "react-toastify";
 import authService from "../auth/authService";
-import axios from "axios";
 
 // Create new goal
 const createGoal = async (goalData, token) => {
