@@ -1,11 +1,10 @@
-import axios from "axios";
+import axiosInstance from "../../plugins/interceptor";
 import { toast } from "react-toastify";
-const API_URL = "http://localhost:8000/api/";
 
 // Register user
 const register = async (userData) => {
   try {
-    const response = await axios.post(API_URL + "register", userData);
+    const response = await axiosInstance.post("register", userData);
 
     if (response.data) {
       localStorage.setItem("user", JSON.stringify(response.data));
@@ -32,7 +31,7 @@ const register = async (userData) => {
 // Login user
 const login = async (userData) => {
   try {
-    const response = await axios.post(API_URL + "login", userData);
+    const response = await axiosInstance.post("login", userData);
 
     if (response.data) {
       localStorage.setItem("user", JSON.stringify(response.data));
@@ -68,7 +67,7 @@ const getUserProfile = async (token) => {
       },
     };
 
-    const response = await axios.get(API_URL + "profile", config);
+    const response = await axiosInstance.get("profile", config);
     return response.data;
   } catch (err) {
     let errorMessage = "Something went wrong";
