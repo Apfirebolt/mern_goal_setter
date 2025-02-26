@@ -1,6 +1,7 @@
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { logout } from '../features/auth/authSlice';
+import Cookies from 'js-cookie';
 import AppBar from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
@@ -12,6 +13,10 @@ const Header = () => {
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
+
+  // get token
+  const token = Cookies.get('token');
+  console.log('Token', token);
 
   const logoutHandler = () => {
     try {

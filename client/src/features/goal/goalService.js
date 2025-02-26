@@ -1,6 +1,7 @@
 import axiosInstance from "../../plugins/interceptor";
 import { toast } from "react-toastify";
 import authService from "../auth/authService";
+import Cookies from 'js-cookie';
 
 // Create new goal
 const createGoal = async (goalData, token) => {
@@ -10,7 +11,7 @@ const createGoal = async (goalData, token) => {
         Authorization: `Bearer ${token}`,
       },
     };
-    const response = await axiosInstance.post("goals/create", goalData, config);
+    const response = await axiosInstance.post("goals", goalData, config);
 
     return response.data;
   } catch (err) {
@@ -30,14 +31,15 @@ const createGoal = async (goalData, token) => {
 };
 
 // Get user goals
-const getGoals = async (token) => {
+const getGoals = async () => {
   try {
+    const token = Cookies.get("token");
     const config = {
       headers: {
         Authorization: `Bearer ${token}`,
       },
     };
-    const response = await axiosInstance.get("goals", config);
+    const response = await axiosInstance.get("goals/mine", config);
     return response.data;
   } catch (err) {
     let errorMessage = "Something went wrong";

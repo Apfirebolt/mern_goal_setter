@@ -1,5 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import goalService from "./goalService";
+import Cookies from "js-cookie";
+
 
 const initialState = {
   goals: [],
@@ -15,7 +17,7 @@ export const createGoal = createAsyncThunk(
   "goals/create",
   async (goalData, thunkAPI) => {
     try {
-      const token = thunkAPI.getState().auth.user.access;
+      const token = Cookies.get("token");
       return await goalService.createGoal(goalData, token);
     } catch (error) {
       const message =
@@ -35,7 +37,7 @@ export const getGoals = createAsyncThunk(
   "goals/getGoals",
   async (_, thunkAPI) => {
     try {
-      const token = thunkAPI.getState().auth.user.access;
+      const token = Cookies.get("token");
       return await goalService.getGoals(token);
     } catch (error) {
       const message =

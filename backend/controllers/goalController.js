@@ -27,7 +27,7 @@ const addGoal = asyncHandler(async (req, res) => {
 });
 
 // @desc    Get logged in user goals
-// @route   GET /api/goals/my-goals
+// @route   GET /api/goals/mine
 // @access  Private
 const getMyGoals = asyncHandler(async (req, res) => {
   const goals = await Goal.find({ user: req.user._id });

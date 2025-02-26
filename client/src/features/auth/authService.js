@@ -1,5 +1,6 @@
 import axiosInstance from "../../plugins/interceptor";
 import { toast } from "react-toastify";
+import Cookies from 'js-cookie';
 
 // Register user
 const register = async (userData) => {
@@ -35,6 +36,8 @@ const login = async (userData) => {
 
     if (response.data) {
       localStorage.setItem("user", JSON.stringify(response.data));
+      // set cookie
+      Cookies.set('token', response.data.token, { expires: 30 });
       toast.success("Logged in successfully");
     }
     return response.data;
@@ -55,6 +58,7 @@ const login = async (userData) => {
 
 // Logout user
 const logout = () => {
+  Cookies.remove('token');
   localStorage.removeItem("user")
 };
 
