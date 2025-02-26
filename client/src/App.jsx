@@ -1,5 +1,6 @@
 import { lazy } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import PrivateRoute from "./components/PrivateRoute";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import HomePage from "./screens/Home";
@@ -8,6 +9,7 @@ import HomePage from "./screens/Home";
 const About = lazy(() => import("./screens/About"));
 const Login = lazy(() => import("./screens/Login"));
 const Register = lazy(() => import("./screens/Register"));
+const Goals = lazy(() => import("./screens/Goals"));
 
 const App = () => {
   return (
@@ -18,6 +20,9 @@ const App = () => {
           <Route path="/about" element={<About/>} />
           <Route path="/login" element={<Login/>} />
           <Route path="/register" element={<Register/>} />
+          <Route path="/goals" element={<PrivateRoute />}>
+            <Route path="/goals" element={<Goals />} />
+          </Route>
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       <Footer />
