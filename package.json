@@ -28,7 +28,10 @@
   },
   "devDependencies": {
     "concurrently": "^9.1.2",
-    "nodemon": "^3.1.9"
+    "jest": "^29.7.0",
+    "mocha": "^11.1.0",
+    "nodemon": "^3.1.9",
+    "supertest": "^7.0.0"
   },
   "author": "APFirebolt",
   "license": "ISC",
