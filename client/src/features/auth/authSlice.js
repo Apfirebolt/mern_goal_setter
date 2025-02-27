@@ -81,6 +81,12 @@ export const authSlice = createSlice({
       state.isSuccess = false
       state.message = ''
     },
+    resetSuccess: (state) => {
+      state.isSuccess = false
+    },
+    resetError: (state) => {
+      state.isError = false
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -91,6 +97,7 @@ export const authSlice = createSlice({
         state.isLoading = false
         state.isSuccess = true
         state.user = action.payload
+        state.message = 'User registered successfully'
       })
       .addCase(register.rejected, (state, action) => {
         state.isLoading = false
@@ -105,6 +112,7 @@ export const authSlice = createSlice({
         state.isLoading = false
         state.isSuccess = true
         state.user = action.payload
+        state.message = 'User logged in successfully'
       })
       .addCase(login.rejected, (state, action) => {
         state.isLoading = false
@@ -129,9 +137,11 @@ export const authSlice = createSlice({
       .addCase(logout.fulfilled, (state) => {
         state.user = null
         state.profile = null
+        state.isSuccess = true
+        state.message = 'User logged out successfully'
       })
   },
 })
 
-export const { reset } = authSlice.actions
+export const { reset, resetError, resetSuccess } = authSlice.actions
 export default authSlice.reducer

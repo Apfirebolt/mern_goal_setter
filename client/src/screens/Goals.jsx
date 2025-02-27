@@ -20,6 +20,8 @@ const Goals = () => {
   const [errorSnackbar, setErrorSnackbar] = useState(false);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
+  const closeSuccess = () => setSuccessSnackbar(false);
+  const closeError = () => setErrorSnackbar(false);
   const closeDelete = () => setConfirmDelete(false);
 
   const dispatch = useDispatch();
@@ -212,9 +214,9 @@ const Goals = () => {
           />
         </Box>
       </Modal>
-      <Snackbar open={successSnackbar} autoHideDuration={6000} onClose={handleClose}>
+      <Snackbar open={successSnackbar} autoHideDuration={6000} onClose={closeSuccess}>
         <Alert
-          onClose={handleClose}
+          onClose={closeSuccess}
           severity="success"
           variant="filled"
           sx={{ width: '100%' }}
@@ -222,9 +224,9 @@ const Goals = () => {
           {message}
         </Alert>
       </Snackbar>
-      <Snackbar open={errorSnackbar} autoHideDuration={6000} onClose={handleClose}>
+      <Snackbar open={errorSnackbar} autoHideDuration={6000} onClose={closeError}>
         <Alert
-          onClose={handleClose}
+          onClose={closeError}
           severity="error"
           variant="filled"
           sx={{ width: '100%' }}

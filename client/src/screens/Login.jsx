@@ -1,13 +1,25 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
-import { login, reset } from "../features/auth/authSlice";
-import { Container, TextField, Button, Typography, Box } from "@mui/material";
+import { login, resetError, resetSuccess } from "../features/auth/authSlice";
+import {
+  Container,
+  TextField,
+  Button,
+  Typography,
+  Box,
+  Snackbar,
+  Alert,
+} from "@mui/material";
 
 const Login = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const [successSnackbar, setSuccessSnackbar] = useState(false);
+  const [errorSnackbar, setErrorSnackbar] = useState(false);
+  const closeSuccess = () => setSuccessSnackbar(false);
+  const closeError = () => setErrorSnackbar(false);
 
   const { user, isError, isSuccess, message } = useSelector(
     (state) => state.auth
@@ -24,18 +36,35 @@ const Login = () => {
     dispatch(login(data));
   };
 
+  // if user is logged in, redirect to home page
+  useEffect(() => {
+    if (user) {
+      navigate("/");
+    }
+  }, [user, navigate]);
+
+
+  useEffect(() => {
+    if (isSuccess) {
+      setSuccessSnackbar(true);
+      dispatch(resetSuccess());
+      setTimeout(() => {
+        setSuccessSnackbar(false);
+      }, 3000);
+    }
+  }
+  , [isSuccess, dispatch, navigate]);
+
   useEffect(() => {
     if (isError) {
-      console.error(message);
+      setErrorSnackbar(true);
+      setTimeout(() => {
+        setErrorSnackbar(false);
+        dispatch(resetError());
+      }, 3000);
     }
-
-    // Redirect when logged in
-    if (isSuccess || user) {
-      navigate('/');
-    }
-
-    dispatch(reset());
-  }, [isError, isSuccess, user, message, navigate, dispatch]);
+  }
+  , [isError, dispatch]);
 
   return (
     <Container maxWidth="sm">
@@ -75,6 +104,34 @@ const Login = () => {
           </Button>
         </form>
       </Box>
+      <Snackbar
+        open={successSnackbar}
+        autoHideDuration={6000}
+        onClose={closeSuccess}
+      >
+        <Alert
+          onClose={closeSuccess}
+          severity="success"
+          variant="filled"
+          sx={{ width: "100%" }}
+        >
+          {message}
+        </Alert>
+      </Snackbar>
+      <Snackbar
+        open={errorSnackbar}
+        autoHideDuration={6000}
+        onClose={closeError}
+      >
+        <Alert
+          onClose={closeError}
+          severity="error"
+          variant="filled"
+          sx={{ width: "100%" }}
+        >
+          {message}
+        </Alert>
+      </Snackbar>
     </Container>
   );
 };

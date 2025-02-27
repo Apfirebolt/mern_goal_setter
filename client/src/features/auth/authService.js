@@ -1,5 +1,4 @@
 import axiosInstance from "../../plugins/interceptor";
-import { toast } from "react-toastify";
 import Cookies from 'js-cookie';
 
 // Register user
@@ -8,8 +7,6 @@ const register = async (userData) => {
     const response = await axiosInstance.post("users", userData);
 
     if (response.data) {
-      localStorage.setItem("user", JSON.stringify(response.data));
-      toast.success("Registered successfully");
       // redirect to login
       window.location.href = "/login";
     }
@@ -25,7 +22,7 @@ const register = async (userData) => {
     if (err.response.status === 409) {
       errorMessage = err.response.data.detail;
     }
-    toast.error(errorMessage);
+    console.error(errorMessage);
   }
 };
 
@@ -38,7 +35,6 @@ const login = async (userData) => {
       localStorage.setItem("user", JSON.stringify(response.data));
       // set cookie
       Cookies.set('token', response.data.token, { expires: 30 });
-      toast.success("Logged in successfully");
     }
     return response.data;
   } catch (err) {
@@ -52,7 +48,7 @@ const login = async (userData) => {
     if (err.response.status === 401) {
       errorMessage = err.response.data.detail;
     }
-    toast.error(errorMessage);
+    console.error(errorMessage);
   }
 };
 
@@ -84,7 +80,7 @@ const getUserProfile = async (token) => {
     if (err.response.status === 404) {
       errorMessage = err.response.data.detail;
     }
-    toast.error(errorMessage);
+    console.error(errorMessage);
   }
 };
 

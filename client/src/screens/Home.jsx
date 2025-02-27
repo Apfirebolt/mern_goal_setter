@@ -1,6 +1,42 @@
-import { Container, Typography, Box } from "@mui/material";
+import { useEffect, useState } from "react";
+import { resetError, resetSuccess } from "../features/auth/authSlice";
+import { useSelector, useDispatch } from "react-redux";
+import { Container, Typography, Box, Snackbar, Alert } from "@mui/material";
 
 const Home = () => {
+
+  const dispatch = useDispatch();
+  const [successSnackbar, setSuccessSnackbar] = useState(false);
+  const [errorSnackbar, setErrorSnackbar] = useState(false);
+  const closeSuccess = () => setSuccessSnackbar(false);
+  const closeError = () => setErrorSnackbar(false);
+
+  const { isError, isSuccess, message } = useSelector(
+    (state) => state.auth
+  );
+
+  useEffect(() => {
+    if (isSuccess) {
+      setSuccessSnackbar(true);
+      setTimeout(() => {
+        setSuccessSnackbar(false);
+        dispatch(resetSuccess());
+      }, 3000);
+    }
+  }
+  , [isSuccess, dispatch]);
+
+  useEffect(() => {
+    if (isError) {
+      setErrorSnackbar(true);
+      setTimeout(() => {
+        setErrorSnackbar(false);
+        dispatch(resetError());
+      }, 3000);
+    }
+  }
+  , [isError, dispatch]);
+
   return (
     <Container>
       <Box my={4}>
@@ -12,6 +48,34 @@ const Home = () => {
           goals. Explore our features and start your journey today!
         </Typography>
       </Box>
+      <Snackbar
+        open={successSnackbar}
+        autoHideDuration={6000}
+        onClose={closeSuccess}
+      >
+        <Alert
+          onClose={closeSuccess}
+          severity="success"
+          variant="filled"
+          sx={{ width: "100%" }}
+        >
+          {message}
+        </Alert>
+      </Snackbar>
+      <Snackbar
+        open={errorSnackbar}
+        autoHideDuration={6000}
+        onClose={closeError}
+      >
+        <Alert
+          onClose={closeError}
+          severity="error"
+          variant="filled"
+          sx={{ width: "100%" }}
+        >
+          {message}
+        </Alert>
+      </Snackbar>
     </Container>
   );
 };
