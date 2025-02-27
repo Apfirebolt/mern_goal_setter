@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { createGoal, getGoals } from "../features/goal/goalSlice";
+import { createGoal, getGoals, deleteGoal, updateGoal } from "../features/goal/goalSlice";
 import GoalForm from "../components/GoalForm";
 import {
   Container,
@@ -13,6 +13,7 @@ import {
 
 const Goals = () => {
   const [open, setOpen] = useState(false);
+  const [selectedGoal, setSelectedGoal] = useState(null);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
 
@@ -34,6 +35,24 @@ const Goals = () => {
     await dispatch(createGoal(data));
     await dispatch(getGoals());
     handleClose();
+  }
+
+  const deleteGoalUtil = async (id) => {
+    // Add delete logic here
+    await dispatch(deleteGoal(id));
+    await dispatch(getGoals());
+  }
+
+  const updateGoalUtil = async (data) => {
+    // Add update logic here
+    await dispatch(updateGoal(data));
+    await dispatch(getGoals());
+    handleClose();
+  }
+
+  const updateGoalHandler = (goal) => {
+    setSelectedGoal(goal);
+    handleOpen();
   }
 
   useEffect(() => {
@@ -66,6 +85,16 @@ const Goals = () => {
                 <Typography variant="body2" color="textSecondary">
                   Category: {goal.category}
                 </Typography>
+                <Container
+                  sx={{ mt: 2, p: 0 , display: "flex", justifyContent: "center" }}
+                >
+                  <Button variant="contained" color="primary" onClick={() => updateGoalHandler(goal)}>
+                    Edit
+                  </Button>
+                  <Button variant="contained" color="error" sx={{ ml: 1 }} onClick={() => deleteGoalUtil(goal._id)}>
+                    Delete
+                  </Button>
+                </Container>
               </Box>
             </Grid>
           ))}
@@ -73,7 +102,7 @@ const Goals = () => {
       </Box>
       <Modal open={open} onClose={handleClose}>
         <Box sx={style}>
-          <GoalForm createGoal={createGoalUtil} closeForm={handleClose} />
+          <GoalForm createGoal={createGoalUtil} updateGoal={updateGoalUtil} closeForm={handleClose} goal={selectedGoal} />
         </Box>
       </Modal>
     </Container>

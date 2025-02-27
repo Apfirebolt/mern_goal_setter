@@ -77,7 +77,7 @@ export const updateGoal = createAsyncThunk(
   "goals/update",
   async (goalData, thunkAPI) => {
     try {
-      const token = thunkAPI.getState().auth.user.access;
+      const token = Cookies.get("token");
       return await goalService.updateGoal(goalData, token);
     } catch (error) {
       const message =
@@ -97,7 +97,7 @@ export const deleteGoal = createAsyncThunk(
   "goals/delete",
   async (goalId, thunkAPI) => {
     try {
-      const token = thunkAPI.getState().auth.user.access;
+      const token = Cookies.get("token");
       return await goalService.deleteGoal(goalId, token);
     } catch (error) {
       const message =

@@ -1,7 +1,7 @@
 import axiosInstance from "../../plugins/interceptor";
 import { toast } from "react-toastify";
 import authService from "../auth/authService";
-import Cookies from 'js-cookie';
+import Cookies from "js-cookie";
 
 // Create new goal
 const createGoal = async (goalData, token) => {
@@ -83,7 +83,11 @@ const updateGoal = async (data, token) => {
     };
 
     // Extract the ID from the data payload
-    const response = await axiosInstance.patch("goals/" + data.id, data, config);
+    const response = await axiosInstance.put(
+      "goals/" + data.id,
+      data,
+      config
+    );
 
     return response.data;
   } catch (err) {

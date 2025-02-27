@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { Container, TextField, Button, Typography, Box } from "@mui/material";
 import PropTypes from "prop-types";
@@ -7,20 +8,43 @@ const GoalForm = (props) => {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm();
+    setValue,
+  } = useForm({
+    defaultValues: {
+      title: props.goal ? props.goal.title : "",
+      description: props.goal ? props.goal.description : "",
+      category: props.goal ? props.goal.category : "",
+      startDate: props.goal ? props.goal.startDate : "",
+      endDate: props.goal ? props.goal.endDate : "",
+    },
+  });
+
+  useEffect(() => {
+    if (props.goal) {
+      setValue("title", props.goal.title);
+      setValue("description", props.goal.description);
+      setValue("category", props.goal.category);
+      setValue("startDate", props.goal.startDate.split("T")[0]);
+      setValue("endDate", props.goal.endDate.split("T")[0]);
+    }
+  }, [props.goal, setValue]);
 
   const { createGoal, closeForm } = props;
 
   const onSubmit = (data) => {
     // Add validation and submit logic here
-    createGoal(data);
+    if (props.goal) {
+      props.updateGoal({ ...data, id: props.goal._id });
+    } else {
+      createGoal(data);
+    }
   };
 
   return (
     <Container maxWidth="sm">
       <Box sx={{ mt: 2 }}>
         <Typography variant="h4" component="h1" gutterBottom>
-          Create Goal
+          {props.goal ? "Update Goal" : "Create Goal"}
         </Typography>
         <form onSubmit={handleSubmit(onSubmit)}>
           <TextField
@@ -79,7 +103,7 @@ const GoalForm = (props) => {
               color="primary"
               sx={{ mt: 2, mr: 2 }}
             >
-              Create
+              {props.goal ? "Update" : "Create"}
             </Button>
             <Button
               variant="contained"
@@ -99,6 +123,8 @@ const GoalForm = (props) => {
 GoalForm.propTypes = {
   createGoal: PropTypes.func.isRequired,
   closeForm: PropTypes.func.isRequired,
+  goal: PropTypes.object,
+  updateGoal: PropTypes.func,
 };
 
 export default GoalForm;
