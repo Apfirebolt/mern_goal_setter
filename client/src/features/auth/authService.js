@@ -5,11 +5,6 @@ import Cookies from 'js-cookie';
 const register = async (userData) => {
   try {
     const response = await axiosInstance.post("users", userData);
-
-    if (response.data) {
-      // redirect to login
-      window.location.href = "/login";
-    }
     return response.data;
   } catch (err) {
     let errorMessage = "Something went wrong";

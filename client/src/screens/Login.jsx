@@ -21,7 +21,7 @@ const Login = () => {
   const closeSuccess = () => setSuccessSnackbar(false);
   const closeError = () => setErrorSnackbar(false);
 
-  const { user, isError, isSuccess, message } = useSelector(
+  const { isError, isSuccess, message } = useSelector(
     (state) => state.auth
   );
 
@@ -36,24 +36,17 @@ const Login = () => {
     dispatch(login(data));
   };
 
-  // if user is logged in, redirect to home page
   useEffect(() => {
-    if (user) {
-      navigate("/");
-    }
-  }, [user, navigate]);
-
-
-  useEffect(() => {
-    if (isSuccess) {
+    if (isSuccess && message === "User logged in successfully") {
       setSuccessSnackbar(true);
       dispatch(resetSuccess());
       setTimeout(() => {
         setSuccessSnackbar(false);
-      }, 3000);
+        navigate("/");
+      }, 1000);
     }
   }
-  , [isSuccess, dispatch, navigate]);
+  , [isSuccess, dispatch, navigate, message]);
 
   useEffect(() => {
     if (isError) {

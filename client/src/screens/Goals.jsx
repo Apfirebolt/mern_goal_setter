@@ -131,7 +131,7 @@ const Goals = () => {
         <Typography variant="h4" component="h1" gutterBottom>
           Goals
         </Typography>
-        <Button onClick={createGoalHandler} variant="contained" color="primary">
+        <Button onClick={createGoalHandler} variant="contained" sx={{ backgroundColor: "#333" }}>
           Add Goal
         </Button>
       </Box>

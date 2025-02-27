@@ -1,17 +1,31 @@
-import { useEffect } from "react";
+import { use, useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
-import { register as registerUser, reset } from "../features/auth/authSlice";
-import { Container, TextField, Button, Typography, Box } from "@mui/material";
+import {
+  register as registerUser,
+  resetSuccess,
+  resetError,
+} from "../features/auth/authSlice";
+import {
+  Container,
+  TextField,
+  Button,
+  Typography,
+  Box,
+  Snackbar,
+  Alert,
+} from "@mui/material";
 
 const Register = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const [successSnackbar, setSuccessSnackbar] = useState(false);
+  const [errorSnackbar, setErrorSnackbar] = useState(false);
+  const closeSuccess = () => setSuccessSnackbar(false);
+  const closeError = () => setErrorSnackbar(false);
 
-  const { user, isError, isSuccess, message } = useSelector(
-    (state) => state.auth
-  );
+  const { user, isError, isSuccess, message } = useSelector((state) => state.auth);
 
   const {
     register,
@@ -25,17 +39,31 @@ const Register = () => {
   };
 
   useEffect(() => {
+    if (user) {
+      navigate("/");
+    }
+  }, [user, navigate]);
+
+  useEffect(() => {
+    if (isSuccess && message === "User registered successfully, please login") {
+      setSuccessSnackbar(true);
+      dispatch(resetSuccess());
+      setTimeout(() => {
+        setSuccessSnackbar(false);
+        navigate("/login");
+      }, 1000);
+    }
+  }, [isSuccess, dispatch, navigate, message]);
+
+  useEffect(() => {
     if (isError) {
-      console.error(message);
+      setErrorSnackbar(true);
+      setTimeout(() => {
+        setErrorSnackbar(false);
+        dispatch(resetError());
+      }, 3000);
     }
-
-    // Redirect when registered
-    if (isSuccess || user) {
-      navigate('/');
-    }
-
-    dispatch(reset());
-  }, [isError, isSuccess, user, message, navigate, dispatch]);
+  }, [isError, dispatch]);
 
   return (
     <Container maxWidth="sm">
@@ -84,6 +112,34 @@ const Register = () => {
           </Button>
         </form>
       </Box>
+      <Snackbar
+        open={successSnackbar}
+        autoHideDuration={6000}
+        onClose={closeSuccess}
+      >
+        <Alert
+          onClose={closeSuccess}
+          severity="success"
+          variant="filled"
+          sx={{ width: "100%" }}
+        >
+          {message}
+        </Alert>
+      </Snackbar>
+      <Snackbar
+        open={errorSnackbar}
+        autoHideDuration={6000}
+        onClose={closeError}
+      >
+        <Alert
+          onClose={closeError}
+          severity="error"
+          variant="filled"
+          sx={{ width: "100%" }}
+        >
+          {message}
+        </Alert>
+      </Snackbar>
     </Container>
   );
 };

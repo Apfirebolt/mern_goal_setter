@@ -18,10 +18,6 @@ const Home = () => {
   useEffect(() => {
     if (isSuccess) {
       setSuccessSnackbar(true);
-      setTimeout(() => {
-        setSuccessSnackbar(false);
-        dispatch(resetSuccess());
-      }, 3000);
     }
   }
   , [isSuccess, dispatch]);

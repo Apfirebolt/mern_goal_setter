@@ -100,14 +100,13 @@ const GoalForm = (props) => {
             <Button
               type="submit"
               variant="contained"
-              color="primary"
-              sx={{ mt: 2, mr: 2 }}
+              sx={{ mt: 2, mr: 2, backgroundColor: "#333" }}
             >
               {props.goal ? "Update" : "Create"}
             </Button>
             <Button
               variant="contained"
-              color="secondary"
+              color="error"
               sx={{ mt: 2 }}
               onClick={closeForm}
             >
