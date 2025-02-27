@@ -72,7 +72,7 @@ const Header = () => {
   return (
     <div>
       <AppBar position="static">
-        <Toolbar>
+        <Toolbar style={{ backgroundColor: '#bc6c25' }}>
           <Typography variant="h6">
             Goals Tracker
           </Typography>
@@ -91,7 +91,7 @@ const Header = () => {
                 anchor="right"
                 open={drawerOpen}
                 onClose={toggleDrawer(false)}
-                style={{ width: '50%' }}
+                PaperProps={{ style: { width: '50%', backgroundColor: '#fefae0' } }}
               >
                 <List onClick={toggleDrawer(false)} onKeyDown={toggleDrawer(false)}>
                   {menuItems}

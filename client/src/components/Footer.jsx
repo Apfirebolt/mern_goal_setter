@@ -7,10 +7,8 @@ const Footer = () => {
         py: 3,
         px: 2,
         mt: "2.5rem",
-        backgroundColor: (theme) =>
-          theme.palette.mode === "light"
-            ? theme.palette.grey[200]
-            : theme.palette.grey[800],
+        backgroundColor: "#fefae0",
+        textAlign: "center",
       }}
     >
       <Container maxWidth="sm">

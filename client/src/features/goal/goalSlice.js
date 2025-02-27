@@ -122,6 +122,12 @@ export const goalSlice = createSlice({
       state.isLoading = false;
       state.isSuccess = false;
     },
+    resetSuccess: (state) => {
+      state.isSuccess = false;
+    },
+    resetError: (state) => {
+      state.isError = false;
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -131,6 +137,7 @@ export const goalSlice = createSlice({
       .addCase(createGoal.fulfilled, (state) => {
         state.isLoading = false;
         state.isSuccess = true;
+        state.message = "Goal created successfully";
       })
       .addCase(createGoal.rejected, (state, action) => {
         state.isLoading = false;
@@ -168,6 +175,7 @@ export const goalSlice = createSlice({
         state.isLoading = false;
         state.isSuccess = true;
         state.goal = action.payload;
+        state.message = "Goal updated successfully";
       })
       .addCase(updateGoal.rejected, (state, action) => {
         state.isLoading = false;
@@ -180,6 +188,7 @@ export const goalSlice = createSlice({
       .addCase(deleteGoal.fulfilled, (state) => {
         state.isLoading = false;
         state.isSuccess = true;
+        state.message = "Goal deleted successfully";
       })
       .addCase(deleteGoal.rejected, (state, action) => {
         state.isLoading = false;
@@ -189,5 +198,5 @@ export const goalSlice = createSlice({
   },
 });
 
-export const { reset, resetVariables } = goalSlice.actions;
+export const { reset, resetVariables, resetError, resetSuccess } = goalSlice.actions;
 export default goalSlice.reducer;
