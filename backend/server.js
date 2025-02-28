@@ -19,7 +19,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // Option 1: Allow requests from port 3000 only
 const corsOptions = {
-  origin: 'http://localhost:3000', // or your specific domain/IP
+  origin: ['http://localhost:3000', 'http://localhost:5000'], // or your specific domain/IPs
   optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
 };
 
@@ -28,6 +28,8 @@ app.use(cors(corsOptions));
 const __dirname = path.resolve();
 app.use("/uploads", express.static(path.join(__dirname, "/uploads")));
 
+app.use("/api/users", userRoutes);
+app.use("/api/goals", goalRoutes);
 
 if (process.env.NODE_ENV === 'production') {
   app.use(express.static(path.join(__dirname, '/client/dist')));
@@ -40,9 +42,6 @@ if (process.env.NODE_ENV === 'production') {
     res.send('API is running....');
   });
 }
-
-app.use("/api/users", userRoutes);
-app.use("/api/goals", goalRoutes);
 
 app.listen(port, () =>
   console.log(`Server running in ${process.env.NODE_ENV} mode on port ${port}`)
