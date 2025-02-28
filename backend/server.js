@@ -19,7 +19,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // Option 1: Allow requests from port 3000 only
 const corsOptions = {
-  origin: ['http://localhost:3000', 'http://localhost:5000'], // or your specific domain/IPs
+  origin: ['http://localhost:3000', 'http://localhost:5000', 'http://localhost'], // or your specific domain/IPs
   optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
 };
 
