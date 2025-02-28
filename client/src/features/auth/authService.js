@@ -7,17 +7,8 @@ const register = async (userData) => {
     const response = await axiosInstance.post("users", userData);
     return response.data;
   } catch (err) {
-    let errorMessage = "Something went wrong";
-    if (err.response.status === 401) {
-      errorMessage = "Unauthorized access, please login again.";
-    }
-    if (err.response.status === 400) {
-      errorMessage = err.response.data.detail;
-    }
-    if (err.response.status === 409) {
-      errorMessage = err.response.data.detail;
-    }
-    console.error(errorMessage);
+    console.error(err)
+    return Promise.reject(err);
   }
 };
 
@@ -33,17 +24,9 @@ const login = async (userData) => {
     }
     return response.data;
   } catch (err) {
-    let errorMessage = "Something went wrong";
-    if (err.response.status === 400) {
-      errorMessage = err.response.data.detail;
-    }
-    if (err.response.status === 404) {
-      errorMessage = err.response.data.detail;
-    }
-    if (err.response.status === 401) {
-      errorMessage = err.response.data.detail;
-    }
-    console.error(errorMessage);
+    console.error(err)
+    // reject
+    return Promise.reject(err);
   }
 };
 
@@ -65,17 +48,8 @@ const getUserProfile = async (token) => {
     const response = await axiosInstance.get("profile", config);
     return response.data;
   } catch (err) {
-    let errorMessage = "Something went wrong";
-    if (err.response.status === 401) {
-      errorMessage = err.response.data.detail;
-      localStorage.removeItem("user")
-      // redirect to login
-      window.location.href = "/login";
-    }
-    if (err.response.status === 404) {
-      errorMessage = err.response.data.detail;
-    }
-    console.error(errorMessage);
+    console.error(err)
+    return Promise.reject(err);
   }
 };
 
