@@ -1,5 +1,7 @@
 # A Goal setter application in MERN
 
+![Cover](screenshots/3.png)
+
 ![Express](https://img.shields.io/badge/Express.js-404D59?style=for-the-badge)
 ![React](https://img.shields.io/badge/React-61DAFB?style=for-the-badge&logo=react&logoColor=white)
 ![MongoDB](https://img.shields.io/badge/MongoDB-4EA94B?style=for-the-badge&logo=mongodb&logoColor=white)
@@ -27,6 +29,14 @@
 - Dark mode and light mode options
 
 These are the suggested features a goal setting app should have. This application over a period of time would eventually contain some of these features.
+
+## Screenshots
+
+Below are the screenshots to add goal and register page.
+
+![Cover](screenshots/1.png)
+![Cover](screenshots/2.png)
+
 
 ## Deployment using Docker
 
