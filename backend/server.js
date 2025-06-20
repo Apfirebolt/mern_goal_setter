@@ -3,6 +3,7 @@ import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
 import { notFound, errorHandler } from './middleware/errorMiddleware.js';
+import { connectRabbitMQ, getRabbitMQChannel, closeRabbitMQ } from './utils/rabbitMQ.js';
 import userRoutes from "./routes/userRoutes.js";
 import goalRoutes from "./routes/goalRoutes.js";
 
@@ -17,6 +18,19 @@ const app = express();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Connect to RabbitMQ
+(async () => {
+    let channel;
+    try {
+        channel = await connectRabbitMQ();
+        await channel.assertQueue('express_queue', { durable: true });
+        console.log("Queue 'express_queue' asserted successfully.");
+    } catch (error) {
+        console.error("Failed to connect to RabbitMQ or assert queue:", error);
+        process.exit(1); // Exit if RabbitMQ connection fails
+    }
+})();
 
 // Option 1: Allow requests from port 3000 only
 const corsOptions = {

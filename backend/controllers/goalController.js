@@ -1,5 +1,6 @@
 import asyncHandler from "../middleware/asyncHandler.js";
 import Goal from "../models/goal.js";
+import { getRabbitMQChannel } from "../utils/rabbitMQ.js";
 
 // @desc    Create new goal
 // @route   POST /api/goals
@@ -21,6 +22,31 @@ const addGoal = asyncHandler(async (req, res) => {
     });
 
     const createdGoal = await goal.save();
+
+    // Push a message to RabbitMQ queue
+    try {
+      const channel = getRabbitMQChannel();
+      const queueName = 'goal_created_queue'; // Define a specific queue for goal creation events
+
+      // Ensure the queue exists (good practice in both producer and consumer)
+      await channel.assertQueue(queueName, { durable: true });
+
+      // Create a message payload with relevant goal data
+      const messagePayload = {
+        eventName: 'goalCreated',
+        goalId: createdGoal._id,
+        title: createdGoal.title,
+        description: createdGoal.description,
+        userId: createdGoal.user,
+        createdAt: createdGoal.createdAt,
+      };
+      // Publish the message
+      channel.sendToQueue(queueName, Buffer.from(JSON.stringify(messagePayload)), { persistent: true });
+      console.log(`[RabbitMQ] Sent 'goalCreated' event for goal ID: ${createdGoal._id}`);
+
+    } catch (mqError) {
+      console.error("Failed to publish 'goalCreated' message to RabbitMQ:", mqError);
+    }
 
     res.status(201).json(createdGoal);
   }
