@@ -28,14 +28,14 @@ app.use(express.urlencoded({ extended: true }));
         console.log("Queue 'express_queue' asserted successfully.");
     } catch (error) {
         console.error("Failed to connect to RabbitMQ or assert queue:", error);
-        process.exit(1); // Exit if RabbitMQ connection fails
+        process.exit(1);
     }
 })();
 
 // Option 1: Allow requests from port 3000 only
 const corsOptions = {
-  origin: ['http://localhost:3000', 'http://localhost:5000', 'http://localhost'], // or your specific domain/IPs
-  optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
+  origin: ['http://localhost:3000', 'http://localhost:5000', 'http://localhost'],
+  optionsSuccessStatus: 200,
 };
 
 app.use(cors(corsOptions));

@@ -26,7 +26,7 @@ const addGoal = asyncHandler(async (req, res) => {
     // Push a message to RabbitMQ queue
     try {
       const channel = getRabbitMQChannel();
-      const queueName = 'goal_created_queue'; // Define a specific queue for goal creation events
+      const queueName = 'goal_created_queue';
 
       // Ensure the queue exists (good practice in both producer and consumer)
       await channel.assertQueue(queueName, { durable: true });

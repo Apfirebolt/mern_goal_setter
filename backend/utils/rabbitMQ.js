@@ -22,15 +22,13 @@ export const connectRabbitMQ = async () => {
         // Handle connection close/error
         connection.on("close", () => {
             console.error("RabbitMQ connection closed! Attempting to reconnect...");
-            // Implement a reconnection strategy here if needed for robustness
-            channel = null; // Invalidate the channel
-            connection = null; // Invalidate the connection
-            // You might want to re-call connectRabbitMQ after a delay
+
+            channel = null;
+            connection = null;
         });
 
         connection.on("error", (err) => {
             console.error("RabbitMQ connection error:", err);
-            // Handle error, possibly try to reconnect
         });
 
         return channel;
