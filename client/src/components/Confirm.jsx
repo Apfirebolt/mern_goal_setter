@@ -1,27 +1,60 @@
-import { Container, Button, Typography, Box } from "@mui/material";
+import { Container, Button, Typography, Box, Paper } from "@mui/material";
 import PropTypes from "prop-types";
+import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 
 const ConfirmModal = (props) => {
   const { confirmAction, cancelAction, message } = props;
 
   return (
     <Container maxWidth="sm">
-      <Box sx={{ mt: 2 }}>
-        <Typography variant="h4" component="h1" gutterBottom>
-          {message}
-        </Typography>
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={confirmAction}
-          style={{ marginRight: "1rem" }}
+      <Paper
+        elevation={3}
+        sx={{
+          mt: 4,
+          p: 4,
+          borderRadius: 2,
+          textAlign: "center",
+        }}
+      >
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: 2,
+          }}
         >
-          Confirm
-        </Button>
-        <Button variant="contained" color="error" onClick={cancelAction}>
-          Cancel
-        </Button>
-      </Box>
+          <WarningAmberIcon
+            sx={{ fontSize: 60, color: "warning.main", mb: 1 }}
+          />
+          <Typography variant="h5" component="h1" fontWeight="bold">
+            Confirm Action
+          </Typography>
+          <Typography variant="body1" color="text.secondary" sx={{ mb: 2 }}>
+            {message}
+          </Typography>
+          <Box sx={{ display: "flex", gap: 2, width: "100%" }}>
+            <Button
+              variant="outlined"
+              color="inherit"
+              onClick={cancelAction}
+              fullWidth
+              sx={{ borderRadius: 2, textTransform: "none" }}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="contained"
+              color="error"
+              onClick={confirmAction}
+              fullWidth
+              sx={{ borderRadius: 2, textTransform: "none" }}
+            >
+              Confirm
+            </Button>
+          </Box>
+        </Box>
+      </Paper>
     </Container>
   );
 };

@@ -1,6 +1,7 @@
 import asyncHandler from "../middleware/asyncHandler.js";
 import Goal from "../models/goal.js";
 import { getRabbitMQChannel } from "../utils/rabbitMQ.js";
+import { connectElasticsearch, getElasticsearchClient } from '../utils/elasticSearch.js';
 
 // @desc    Create new goal
 // @route   POST /api/goals
@@ -44,6 +45,27 @@ const addGoal = asyncHandler(async (req, res) => {
       channel.sendToQueue(queueName, Buffer.from(JSON.stringify(messagePayload)), { persistent: true });
       console.log(`[RabbitMQ] Sent 'goalCreated' event for goal ID: ${createdGoal._id}`);
 
+      // Optionally, index the new goal in Elasticsearch
+      try {
+        const esClient = getElasticsearchClient();
+        await esClient.index({
+          index: 'goals',
+          id: createdGoal._id.toString(),
+          body: {
+            title: createdGoal.title,
+            description: createdGoal.description,
+            category: createdGoal.category,
+            startDate: createdGoal.startDate,
+            endDate: createdGoal.endDate,
+            user: createdGoal.user,
+            createdAt: createdGoal.createdAt,
+            updatedAt: createdGoal.updatedAt,
+          },
+        });
+        console.log(`[Elasticsearch] Indexed goal ID: ${createdGoal._id}`);
+      } catch (esError) {
+        console.error("Failed to index goal in Elasticsearch:", esError);
+      }
     } catch (mqError) {
       console.error("Failed to publish 'goalCreated' message to RabbitMQ:", mqError);
     }

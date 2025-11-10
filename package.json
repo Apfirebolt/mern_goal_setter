@@ -20,6 +20,7 @@
     "MongoDB"
   ],
   "dependencies": {
+    "@elastic/elasticsearch": "^7.17.0",
     "amqplib": "^0.10.8",
     "bcryptjs": "^3.0.2",
     "cookie-parser": "^1.4.7",

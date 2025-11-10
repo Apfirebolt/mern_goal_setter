@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import cors from "cors";
 import { notFound, errorHandler } from './middleware/errorMiddleware.js';
 import { connectRabbitMQ, getRabbitMQChannel, closeRabbitMQ } from './utils/rabbitMQ.js';
+import { connectElasticsearch } from './utils/elasticSearch.js';
 import userRoutes from "./routes/userRoutes.js";
 import goalRoutes from "./routes/goalRoutes.js";
 
@@ -28,6 +29,16 @@ app.use(express.urlencoded({ extended: true }));
         console.log("Queue 'express_queue' asserted successfully.");
     } catch (error) {
         console.error("Failed to connect to RabbitMQ or assert queue:", error);
+        process.exit(1);
+    }
+})();
+
+// Connect to Elasticsearch
+(async () => {
+    try {
+        await connectElasticsearch();
+    } catch (error) {
+        console.error("Failed to connect to Elasticsearch:", error);
         process.exit(1);
     }
 })();
