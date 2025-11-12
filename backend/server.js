@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import cors from "cors";
 import { notFound, errorHandler } from './middleware/errorMiddleware.js';
 import { connectRabbitMQ, getRabbitMQChannel, closeRabbitMQ } from './utils/rabbitMQ.js';
+import { startScheduledJobs } from "./utils/scheduler.js";
 import { connectElasticsearch } from './utils/elasticSearch.js';
 import userRoutes from "./routes/userRoutes.js";
 import goalRoutes from "./routes/goalRoutes.js";
@@ -48,6 +49,9 @@ const corsOptions = {
   origin: ['http://localhost:3000', 'http://localhost:5000', 'http://localhost'],
   optionsSuccessStatus: 200,
 };
+
+// Start scheduled jobs
+startScheduledJobs();
 
 app.use(cors(corsOptions));
 
