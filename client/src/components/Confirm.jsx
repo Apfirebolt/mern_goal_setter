@@ -1,6 +1,8 @@
 import { Container, Button, Typography, Box, Paper } from "@mui/material";
 import PropTypes from "prop-types";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import CancelIcon from "@mui/icons-material/Cancel";
 
 const ConfirmModal = (props) => {
   const { confirmAction, cancelAction, message } = props;
@@ -39,6 +41,7 @@ const ConfirmModal = (props) => {
               color="inherit"
               onClick={cancelAction}
               fullWidth
+              startIcon={<CancelIcon />}
               sx={{ borderRadius: 2, textTransform: "none" }}
             >
               Cancel
@@ -48,6 +51,7 @@ const ConfirmModal = (props) => {
               color="error"
               onClick={confirmAction}
               fullWidth
+              startIcon={<CheckCircleIcon />}
               sx={{ borderRadius: 2, textTransform: "none" }}
             >
               Confirm

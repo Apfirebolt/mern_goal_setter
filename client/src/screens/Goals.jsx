@@ -8,7 +8,17 @@ import {
 } from "../features/goal/goalSlice";
 import GoalForm from "../components/GoalForm";
 import ConfirmModal from "../components/Confirm";
-import { Container, Typography, Box, Modal, Button, Alert, Snackbar, Grid } from "@mui/material";
+import { Add, Edit, Cancel } from "@mui/icons-material";
+import {
+  Container,
+  Typography,
+  Box,
+  Modal,
+  Button,
+  Alert,
+  Snackbar,
+  Grid,
+} from "@mui/material";
 import { resetSuccess, resetError } from "../features/goal/goalSlice";
 
 const Goals = () => {
@@ -25,7 +35,9 @@ const Goals = () => {
   const closeDelete = () => setConfirmDelete(false);
 
   const dispatch = useDispatch();
-  const { goals, isSuccess, isError, message } = useSelector((state) => state.goals);
+  const { goals, isSuccess, isError, message } = useSelector(
+    (state) => state.goals
+  );
 
   useEffect(() => {
     if (isSuccess) {
@@ -105,8 +117,7 @@ const Goals = () => {
         setSuccessSnackbar(false);
       }, 3000);
     }
-  }
-  , [isSuccess]);
+  }, [isSuccess]);
 
   useEffect(() => {
     if (isError) {
@@ -115,8 +126,7 @@ const Goals = () => {
         setErrorSnackbar(false);
       }, 3000);
     }
-  }
-  , [isError]);
+  }, [isError]);
 
   return (
     <Container>
@@ -131,7 +141,12 @@ const Goals = () => {
         <Typography variant="h4" component="h1" gutterBottom>
           Goals
         </Typography>
-        <Button onClick={createGoalHandler} variant="contained" sx={{ backgroundColor: "#333" }}>
+        <Button
+          onClick={createGoalHandler}
+          variant="contained"
+          sx={{ backgroundColor: "#333" }}
+          startIcon={<Add />}
+        >
           Add Goal
         </Button>
       </Box>
@@ -142,49 +157,64 @@ const Goals = () => {
               <Grid item xs={12} sm={6} md={4} key={goal._id}>
                 <Box
                   sx={{
-                    p: 2,
+                    p: 3,
                     border: 1,
-                    borderColor: "divider",
-                    borderRadius: 1,
-                    backgroundColor: "#fefae0",
+                    borderColor: "grey.300",
+                    borderRadius: 2,
+                    backgroundColor: "#e2f1e9ff",
+                    boxShadow: "0 2px 8px rgba(147, 174, 196, 0.1)",
+                    transition: "transform 0.2s, box-shadow 0.2s",
+                    "&:hover": {
+                      transform: "translateY(-4px)",
+                      boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+                    },
                   }}
                 >
-                  <Typography variant="h6">{goal.title}</Typography>
-                  <Typography>{goal.description}</Typography>
-                  <Typography variant="body2" color="textSecondary">
-                    Start Date: {new Date(goal.startDate).toLocaleDateString()}
+                  <Typography variant="h5" sx={{ mb: 2, fontWeight: 600, color: "#333" }}>
+                    {goal.title}
                   </Typography>
-                  <Typography variant="body2" color="textSecondary">
-                    End Date: {new Date(goal.endDate).toLocaleDateString()}
+                  <Typography sx={{ mb: 2, color: "#555" }}>
+                    {goal.description}
                   </Typography>
-                  <Typography variant="body2" color="textSecondary">
-                    Category: {goal.category}
-                  </Typography>
-                  <Container
+                  <Box sx={{ mb: 2 }}>
+                    <Typography variant="body2" sx={{ color: "#777", mb: 0.5 }}>
+                      <strong>Start Date:</strong> {new Date(goal.startDate).toLocaleDateString()}
+                    </Typography>
+                    <Typography variant="body2" sx={{ color: "#777", mb: 0.5 }}>
+                      <strong>End Date:</strong> {new Date(goal.endDate).toLocaleDateString()}
+                    </Typography>
+                    <Typography variant="body2" sx={{ color: "#777" }}>
+                      <strong>Category:</strong> {goal.category}
+                    </Typography>
+                  </Box>
+                  <Box
                     sx={{
                       mt: 2,
-                      padding: '1rem 0 !important',
+                      pt: 2,
+                      borderTop: 1,
+                      borderColor: "grey.200",
                       display: "flex",
                       justifyContent: "center",
-                      backgroundColor: "#dda15e",
+                      gap: 1,
                     }}
                   >
                     <Button
                       variant="contained"
                       sx={{ backgroundColor: "#333" }}
                       onClick={() => updateGoalHandler(goal)}
+                      startIcon={<Edit />}
                     >
                       Edit
                     </Button>
                     <Button
                       variant="contained"
                       color="error"
-                      sx={{ ml: 1 }}
                       onClick={() => deleteGoalHandler(goal)}
+                      startIcon={<Cancel />}
                     >
                       Delete
                     </Button>
-                  </Container>
+                  </Box>
                 </Box>
               </Grid>
             ))}
@@ -214,22 +244,30 @@ const Goals = () => {
           />
         </Box>
       </Modal>
-      <Snackbar open={successSnackbar} autoHideDuration={6000} onClose={closeSuccess}>
+      <Snackbar
+        open={successSnackbar}
+        autoHideDuration={6000}
+        onClose={closeSuccess}
+      >
         <Alert
           onClose={closeSuccess}
           severity="success"
           variant="filled"
-          sx={{ width: '100%' }}
+          sx={{ width: "100%" }}
         >
           {message}
         </Alert>
       </Snackbar>
-      <Snackbar open={errorSnackbar} autoHideDuration={6000} onClose={closeError}>
+      <Snackbar
+        open={errorSnackbar}
+        autoHideDuration={6000}
+        onClose={closeError}
+      >
         <Alert
           onClose={closeError}
           severity="error"
           variant="filled"
-          sx={{ width: '100%' }}
+          sx={{ width: "100%" }}
         >
           {message}
         </Alert>

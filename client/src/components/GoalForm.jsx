@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { Container, TextField, Button, Typography, Box } from "@mui/material";
+import { Cancel, Add, Edit } from "@mui/icons-material";
 import PropTypes from "prop-types";
 
 const GoalForm = (props) => {
@@ -84,6 +85,7 @@ const GoalForm = (props) => {
             type="date"
             {...register("startDate", { required: "Start Date is required" })}
             error={!!errors.startDate}
+            InputLabelProps={{ shrink: true }}
             fullWidth
             margin="normal"
           />
@@ -93,6 +95,7 @@ const GoalForm = (props) => {
             type="date"
             {...register("endDate", { required: "End Date is required" })}
             error={!!errors.endDate}
+            InputLabelProps={{ shrink: true }}
             fullWidth
             margin="normal"
           />
@@ -100,6 +103,7 @@ const GoalForm = (props) => {
             <Button
               type="submit"
               variant="contained"
+              startIcon={props.goal ? <Edit /> : <Add />}
               sx={{ mt: 2, mr: 2, backgroundColor: "#333" }}
             >
               {props.goal ? "Update" : "Create"}
@@ -107,6 +111,7 @@ const GoalForm = (props) => {
             <Button
               variant="contained"
               color="error"
+              startIcon={<Cancel />}
               sx={{ mt: 2 }}
               onClick={closeForm}
             >
