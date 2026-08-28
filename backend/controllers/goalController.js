@@ -36,6 +36,7 @@ const addGoal = asyncHandler(async (req, res) => {
       const messagePayload = {
         eventName: 'goalCreated',
         goalId: createdGoal._id,
+        user: req.user._id,
         title: createdGoal.title,
         description: createdGoal.description,
         userId: createdGoal.user,
