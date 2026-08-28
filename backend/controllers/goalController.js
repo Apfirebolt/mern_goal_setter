@@ -1,7 +1,32 @@
 import asyncHandler from "../middleware/asyncHandler.js";
 import Goal from "../models/goal.js";
-import { getRabbitMQChannel } from "../utils/rabbitMQ.js";
-import { connectElasticsearch, getElasticsearchClient } from '../utils/elasticSearch.js';
+import { getRabbitMQChannel, QUEUES } from "../utils/rabbitMQ.js";
+import { getElasticsearchClient } from "../utils/elasticSearch.js";
+
+// Helper to publish events to RabbitMQ stream queues
+const publishStreamEvent = async (queueName, payload) => {
+  try {
+    const channel = getRabbitMQChannel();
+
+    // Ensure stream queue definition matches rabbitMQ.js
+    await channel.assertQueue(queueName, {
+      durable: true,
+      arguments: {
+        "x-queue-type": "stream",
+        "x-max-age": "7D",
+        "x-max-length-bytes": 104857600,
+      },
+    });
+
+    channel.sendToQueue(
+      queueName,
+      Buffer.from(JSON.stringify({ ...payload, timestamp: new Date().toISOString() })),
+      { persistent: true }
+    );
+  } catch (error) {
+    console.error(`[RabbitMQ] Failed to publish event to ${queueName}:`, error);
+  }
+};
 
 // @desc    Create new goal
 // @route   POST /api/goals
@@ -12,67 +37,50 @@ const addGoal = asyncHandler(async (req, res) => {
   if (!title || !description) {
     res.status(400);
     throw new Error("Title and description are required");
-  } else {
-    const goal = new Goal({
-      title,
-      description,
-      category,
-      startDate,
-      endDate,
-      user: req.user._id,
-    });
+  }
 
-    const createdGoal = await goal.save();
+  const goal = new Goal({
+    title,
+    description,
+    category,
+    startDate,
+    endDate,
+    user: req.user._id,
+  });
 
-    // Push a message to RabbitMQ queue
-    try {
-      const channel = getRabbitMQChannel();
-      const queueName = 'goal_created_queue';
+  const createdGoal = await goal.save();
 
-      // Ensure the queue exists (good practice in both producer and consumer)
-      await channel.assertQueue(queueName, { durable: true });
+  // 1. Publish persistent stream event (TODO_CREATED / GOAL_CREATED)
+  await publishStreamEvent(QUEUES.TODO_CREATED, {
+    eventName: "goalCreated",
+    goalId: createdGoal._id,
+    userId: req.user._id,
+    data: createdGoal,
+  });
 
-      // Create a message payload with relevant goal data
-      const messagePayload = {
-        eventName: 'goalCreated',
-        goalId: createdGoal._id,
-        user: req.user._id,
+  // 2. Direct Elasticsearch index (or offload this to a stream consumer)
+  try {
+    const esClient = getElasticsearchClient();
+    await esClient.index({
+      index: "goals",
+      id: createdGoal._id.toString(),
+      document: {
         title: createdGoal.title,
         description: createdGoal.description,
-        userId: createdGoal.user,
+        category: createdGoal.category,
+        startDate: createdGoal.startDate,
+        endDate: createdGoal.endDate,
+        user: createdGoal.user,
         createdAt: createdGoal.createdAt,
-      };
-      // Publish the message
-      channel.sendToQueue(queueName, Buffer.from(JSON.stringify(messagePayload)), { persistent: true });
-      console.log(`[RabbitMQ] Sent 'goalCreated' event for goal ID: ${createdGoal._id}`);
-
-      // Optionally, index the new goal in Elasticsearch
-      try {
-        const esClient = getElasticsearchClient();
-        await esClient.index({
-          index: 'goals',
-          id: createdGoal._id.toString(),
-          body: {
-            title: createdGoal.title,
-            description: createdGoal.description,
-            category: createdGoal.category,
-            startDate: createdGoal.startDate,
-            endDate: createdGoal.endDate,
-            user: createdGoal.user,
-            createdAt: createdGoal.createdAt,
-            updatedAt: createdGoal.updatedAt,
-          },
-        });
-        console.log(`[Elasticsearch] Indexed goal ID: ${createdGoal._id}`);
-      } catch (esError) {
-        console.error("Failed to index goal in Elasticsearch:", esError);
-      }
-    } catch (mqError) {
-      console.error("Failed to publish 'goalCreated' message to RabbitMQ:", mqError);
-    }
-
-    res.status(201).json(createdGoal);
+        updatedAt: createdGoal.updatedAt,
+      },
+    });
+    console.log(`[Elasticsearch] Indexed goal ID: ${createdGoal._id}`);
+  } catch (esError) {
+    console.error("[Elasticsearch] Failed to index goal:", esError);
   }
+
+  res.status(201).json(createdGoal);
 });
 
 // @desc    Get logged in user goals
@@ -107,20 +115,48 @@ const updateGoal = asyncHandler(async (req, res) => {
   const { title, description, category, startDate, endDate } = req.body;
   const goal = await Goal.findById(req.params.id);
 
-  if (goal) {
-    goal.title = title || goal.title;
-    goal.description = description || goal.description;
-    goal.category = category || goal.category;
-    goal.startDate = startDate || goal.startDate;
-    goal.endDate = endDate || goal.endDate;
-
-    const updatedGoal = await goal.save();
-
-    res.json(updatedGoal);
-  } else {
+  if (!goal) {
     res.status(404);
     throw new Error("Goal not found");
   }
+
+  goal.title = title || goal.title;
+  goal.description = description || goal.description;
+  goal.category = category || goal.category;
+  goal.startDate = startDate || goal.startDate;
+  goal.endDate = endDate || goal.endDate;
+
+  const updatedGoal = await goal.save();
+
+  // Publish stream event for edit
+  await publishStreamEvent(QUEUES.TODO_EDITED, {
+    eventName: "goalEdited",
+    goalId: updatedGoal._id,
+    userId: req.user._id,
+    updates: { title, description, category, startDate, endDate },
+    data: updatedGoal,
+  });
+
+  // Sync update to Elasticsearch
+  try {
+    const esClient = getElasticsearchClient();
+    await esClient.update({
+      index: "goals",
+      id: updatedGoal._id.toString(),
+      doc: {
+        title: updatedGoal.title,
+        description: updatedGoal.description,
+        category: updatedGoal.category,
+        startDate: updatedGoal.startDate,
+        endDate: updatedGoal.endDate,
+        updatedAt: updatedGoal.updatedAt,
+      },
+    });
+  } catch (esError) {
+    console.error("[Elasticsearch] Failed to update indexed goal:", esError);
+  }
+
+  res.json(updatedGoal);
 });
 
 // @desc    Delete goal
@@ -129,13 +165,25 @@ const updateGoal = asyncHandler(async (req, res) => {
 const deleteGoal = asyncHandler(async (req, res) => {
   const goal = await Goal.findById(req.params.id);
 
-  if (goal) {
-    await goal.deleteOne();
-    res.status(204).end();
-  } else {
+  if (!goal) {
     res.status(404);
     throw new Error("Goal not found");
   }
+
+  await goal.deleteOne();
+
+  // Delete from Elasticsearch
+  try {
+    const esClient = getElasticsearchClient();
+    await esClient.delete({
+      index: "goals",
+      id: req.params.id,
+    });
+  } catch (esError) {
+    console.error("[Elasticsearch] Failed to delete indexed goal:", esError);
+  }
+
+  res.status(204).end();
 });
 
 // @desc    Get all goals
