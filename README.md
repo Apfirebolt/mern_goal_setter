@@ -103,3 +103,15 @@ Let's breakdown some of the complex part of the previous code above.
 
 docker-compose up: This command starts and creates the containers defined in your docker-compose.yml file.
 --build: This flag tells Docker Compose to build or rebuild any images that are specified in your docker-compose.yml file's build section. This is essential when you've made changes to your Dockerfiles or application code.
+
+## Configuring Stripe payments
+
+`brew install stripe/stripe-cli/stripe`
+
+Environment Variables: Verify that your STRIPE_SECRET_KEY and STRIPE_WEBHOOK_SECRET are added to your .env file.
+
+Stripe CLI Listener: Open a separate terminal window and run the CLI forwarder so Stripe can talk to your local backend:
+
+`
+stripe listen --forward-to localhost:5000/webhook
+`

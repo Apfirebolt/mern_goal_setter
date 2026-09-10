@@ -1,12 +1,13 @@
+import 'dotenv/config';
 import path from "path";
 import express from "express";
-import dotenv from "dotenv";
 import cors from "cors";
 
 import { notFound, errorHandler } from './middleware/errorMiddleware.js';
 import { connectRabbitMQ, getRabbitMQChannel, closeRabbitMQ } from './utils/rabbitMQ.js';
 import { startScheduledJobs } from "./utils/scheduler.js";
 import { connectElasticsearch } from './utils/elasticSearch.js';
+import Stripe from 'stripe';
 
 // 1. IMPORT SWAGGER PACKAGES
 import swaggerUi from 'swagger-ui-express'
@@ -15,8 +16,9 @@ import swaggerJsdoc from 'swagger-jsdoc'
 import userRoutes from "./routes/userRoutes.js";
 import goalRoutes from "./routes/goalRoutes.js";
 import notificationRoutes from "./routes/notificationRoutes.js";
+import paymentRoutes from "./routes/paymentRoutes.js";
 
-dotenv.config();
+
 import { connectDB } from "./config/db.js";
 
 const port = process.env.PORT || 5000;
@@ -24,6 +26,55 @@ const port = process.env.PORT || 5000;
 connectDB();
 
 const app = express();
+
+app.post(
+  '/webhook',
+  express.raw({ type: 'application/json' }),
+  async (req, res) => {
+    const sig = req.headers['stripe-signature'];
+    let event;
+
+    try {
+      const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+      event = stripe.webhooks.constructEvent(
+        req.body,
+        sig,
+        process.env.STRIPE_WEBHOOK_SECRET
+      );
+    } catch (err) {
+      console.error(`[Stripe] Webhook signature verification failed: ${err.message}`);
+      return res.status(400).send(`Webhook Error: ${err.message}`);
+    }
+
+    if (event.type === 'checkout.session.completed') {
+      const session = event.data.object;
+      const userId = session.metadata.userId;
+      const goalId = session.metadata.goalId;
+      const amount = session.metadata.customAmount;
+
+      console.log(`[Stripe] Payment verified for User: ${userId}, Goal: ${goalId}, Amount: ${amount}`);
+
+      try {
+        // ==========================================
+        // CUSTOM DATABASE EDITS HERE
+        // ==========================================
+        // Example: Update goal status or credit user points
+        // const goal = await Goal.findById(goalId);
+        // if (goal) {
+        //   goal.isPaid = true;
+        //   await goal.save();
+        // }
+
+        console.log("[Database] Successfully updated after successful payment");
+      } catch (dbError) {
+        console.error("[Database] Failed to process payment update:", dbError);
+        return res.status(500).json({ error: "Database update failed" });
+      }
+    }
+
+    res.json({ received: true });
+  }
+);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -106,6 +157,7 @@ app.use("/uploads", express.static(path.join(__dirname, "/uploads")));
 app.use("/api/users", userRoutes);
 app.use("/api/goals", goalRoutes);
 app.use("/api/notifications", notificationRoutes);
+app.use("/api/payments", paymentRoutes);
 
 if (process.env.NODE_ENV === 'production') {
   app.use(express.static(path.join(__dirname, '/client/dist')));

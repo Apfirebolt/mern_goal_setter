@@ -9,6 +9,7 @@ import {
   resetSuccess,
   resetError,
 } from "../features/goal/goalSlice";
+import { createCheckoutSession } from "../features/payment/paymentSlice";
 import GoalForm from "../components/GoalForm";
 import Confirm from "../components/Confirm";
 import {
@@ -19,6 +20,7 @@ import {
   Clear as ClearIcon,
   CalendarToday as CalendarIcon,
   TrackChanges as GoalIcon,
+  Payment as PaymentIcon,
 } from "@mui/icons-material";
 import {
   Container,
@@ -60,6 +62,7 @@ const Goals = () => {
   const { goals = [], isSuccess, isError, message } = useSelector(
     (state) => state.goals
   );
+  const { isLoading: isPaying } = useSelector((state) => state.payment);
 
   const [searchQuery, setSearchQuery] = useState("");
   const [open, setOpen] = useState(false);
@@ -105,7 +108,7 @@ const Goals = () => {
   const fuse = useMemo(() => {
     return new Fuse(goals, {
       keys: ["title", "description", "category"],
-      threshold: 0.35, // Sensitivity: lower = stricter, higher = fuzzier
+      threshold: 0.35,
       ignoreLocation: true,
     });
   }, [goals]);
@@ -149,6 +152,23 @@ const Goals = () => {
   const createGoalHandler = () => {
     setSelectedGoal(null);
     handleOpen();
+  };
+
+  // Handle Stripe Payment Trigger
+  const handleBuyGoal = async (goal) => {
+    const resultAction = await dispatch(
+      createCheckoutSession({
+        amount: goal.price ?? 1.99, // Fallback price for testing
+        goalId: goal._id,
+      })
+    );
+
+    if (createCheckoutSession.fulfilled.match(resultAction)) {
+      const checkoutUrl = resultAction.payload.url;
+      if (checkoutUrl) {
+        window.location.href = checkoutUrl; // Redirect browser to Stripe Checkout
+      }
+    }
   };
 
   return (
@@ -288,6 +308,13 @@ const Goals = () => {
                       {goal.description || "No description provided."}
                     </Typography>
 
+                    {/* Price Tag for Experimentation */}
+                    <Box sx={{ mb: 2 }}>
+                      <Typography variant="subtitle1" fontWeight={700} color="success.main">
+                        ${goal.price ?? "1.99"}
+                      </Typography>
+                    </Box>
+
                     <Stack spacing={0.8} sx={{ mt: "auto" }}>
                       <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                         <CalendarIcon fontSize="inherit" color="action" />
@@ -308,24 +335,39 @@ const Goals = () => {
 
                   <Divider />
 
-                  <CardActions sx={{ p: 1.5, justifyContent: "flex-end", gap: 1 }}>
+                  <CardActions sx={{ p: 1.5, justifyContent: "space-between", gap: 1 }}>
+                    {/* Buy Button */}
                     <Button
                       size="small"
-                      startIcon={<EditIcon />}
-                      onClick={() => updateGoalHandler(goal)}
-                      sx={{ textTransform: "none" }}
+                      variant="contained"
+                      color="success"
+                      startIcon={<PaymentIcon />}
+                      disabled={isPaying}
+                      onClick={() => handleBuyGoal(goal)}
+                      sx={{ textTransform: "none", fontWeight: 600 }}
                     >
-                      Edit
+                      Buy
                     </Button>
-                    <Button
-                      size="small"
-                      color="error"
-                      startIcon={<DeleteIcon />}
-                      onClick={() => deleteGoalHandler(goal)}
-                      sx={{ textTransform: "none" }}
-                    >
-                      Delete
-                    </Button>
+
+                    <Box sx={{ display: "flex", gap: 0.5 }}>
+                      <Button
+                        size="small"
+                        startIcon={<EditIcon />}
+                        onClick={() => updateGoalHandler(goal)}
+                        sx={{ textTransform: "none" }}
+                      >
+                        Edit
+                      </Button>
+                      <Button
+                        size="small"
+                        color="error"
+                        startIcon={<DeleteIcon />}
+                        onClick={() => deleteGoalHandler(goal)}
+                        sx={{ textTransform: "none" }}
+                      >
+                        Delete
+                      </Button>
+                    </Box>
                   </CardActions>
                 </Card>
               </Fade>
