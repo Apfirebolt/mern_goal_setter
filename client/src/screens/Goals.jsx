@@ -1,6 +1,9 @@
 import { useState, useEffect, useMemo } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import Fuse from "fuse.js";
+import axiosInstance from "../plugins/interceptor";
+import Cookies from "js-cookie";
+import { toast } from "react-toastify";
 import {
   createGoal,
   getGoals,
@@ -19,6 +22,7 @@ import {
   Clear as ClearIcon,
   CalendarToday as CalendarIcon,
   TrackChanges as GoalIcon,
+  Payment as PaymentIcon,
 } from "@mui/icons-material";
 import {
   Container,
@@ -105,7 +109,7 @@ const Goals = () => {
   const fuse = useMemo(() => {
     return new Fuse(goals, {
       keys: ["title", "description", "category"],
-      threshold: 0.35, // Sensitivity: lower = stricter, higher = fuzzier
+      threshold: 0.35,
       ignoreLocation: true,
     });
   }, [goals]);
@@ -149,6 +153,78 @@ const Goals = () => {
   const createGoalHandler = () => {
     setSelectedGoal(null);
     handleOpen();
+  };
+
+  // Razorpay Checkout Handler
+  const handleCheckout = async (goal) => {
+    try {
+      const token = Cookies.get("token");
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      };
+
+      // Fallback price to 100 if goal.price is missing
+      const goalPrice = goal.price || 100;
+
+      // 1. Create order on backend
+      const { data } = await axiosInstance.post(
+        "payments/create-order",
+        { amount: goalPrice },
+        config
+      );
+
+      if (!data.success) {
+        toast.error("Failed to initiate checkout order");
+        return;
+      }
+
+      const { order } = data;
+
+      const options = {
+        key: import.meta.env.VITE_RAZORPAY_KEY_ID || "YOUR_TEST_KEY_ID",
+        amount: order.amount,
+        currency: order.currency,
+        name: "Goal Tracker App",
+        description: `Payment for goal: ${goal.title}`,
+        order_id: order.id,
+        handler: async function (response) {
+          try {
+            // 3. Verify payment signature on backend
+            const verifyRes = await axiosInstance.post(
+              "payments/verify-payment",
+              {
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+              },
+              config
+            );
+
+            if (verifyRes.data.success) {
+              toast.success("Payment verified successfully!");
+            }
+          } catch (err) {
+            console.error("Verification error:", err);
+            toast.error("Payment verification failed on server.");
+          }
+        },
+        prefill: {
+          name: "User",
+          email: "user@example.com",
+        },
+        theme: {
+          color: "#1976d2",
+        },
+      };
+
+      const paymentModal = new window.Razorpay(options);
+      paymentModal.open();
+    } catch (error) {
+      console.error("Checkout initialization error:", error);
+      toast.error("Could not start checkout session.");
+    }
   };
 
   return (
@@ -288,6 +364,16 @@ const Goals = () => {
                       {goal.description || "No description provided."}
                     </Typography>
 
+                    {/* Price Display */}
+                    <Box sx={{ mb: 2, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                      <Typography variant="body2" color="text.secondary">
+                        Price:
+                      </Typography>
+                      <Typography variant="subtitle1" fontWeight={700} color="primary.main">
+                        ₹{goal.price || 100}
+                      </Typography>
+                    </Box>
+
                     <Stack spacing={0.8} sx={{ mt: "auto" }}>
                       <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                         <CalendarIcon fontSize="inherit" color="action" />
@@ -308,24 +394,37 @@ const Goals = () => {
 
                   <Divider />
 
-                  <CardActions sx={{ p: 1.5, justifyContent: "flex-end", gap: 1 }}>
+                  {/* Card Actions including Checkout Button */}
+                  <CardActions sx={{ p: 1.5, justifyContent: "space-between", alignItems: "center" }}>
                     <Button
                       size="small"
-                      startIcon={<EditIcon />}
-                      onClick={() => updateGoalHandler(goal)}
-                      sx={{ textTransform: "none" }}
+                      variant="contained"
+                      color="success"
+                      startIcon={<PaymentIcon />}
+                      onClick={() => handleCheckout(goal)}
+                      sx={{ textTransform: "none", borderRadius: 1.5 }}
                     >
-                      Edit
+                      Pay ₹{goal.price || 100}
                     </Button>
-                    <Button
-                      size="small"
-                      color="error"
-                      startIcon={<DeleteIcon />}
-                      onClick={() => deleteGoalHandler(goal)}
-                      sx={{ textTransform: "none" }}
-                    >
-                      Delete
-                    </Button>
+                    <Box sx={{ display: "flex", gap: 0.5 }}>
+                      <Button
+                        size="small"
+                        startIcon={<EditIcon />}
+                        onClick={() => updateGoalHandler(goal)}
+                        sx={{ textTransform: "none" }}
+                      >
+                        Edit
+                      </Button>
+                      <Button
+                        size="small"
+                        color="error"
+                        startIcon={<DeleteIcon />}
+                        onClick={() => deleteGoalHandler(goal)}
+                        sx={{ textTransform: "none" }}
+                      >
+                        Delete
+                      </Button>
+                    </Box>
                   </CardActions>
                 </Card>
               </Fade>

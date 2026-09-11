@@ -1,7 +1,6 @@
 import asyncHandler from "../middleware/asyncHandler.js";
 import Razorpay from "razorpay";
 import crypto from "crypto";
-// Import any payment model if you wish to persist transactions (e.g., Payment from "../models/payment.js")
 
 // Initialize Razorpay instance safely
 const getRazorpayInstance = () => {
@@ -46,7 +45,7 @@ const createOrder = asyncHandler(async (req, res) => {
   });
 });
 
-// @desc    Verify Razorpay payment signature
+// @desc    Verify Razorpay payment signature & fetch details
 // @route   POST /api/payments/verify-payment
 // @access  Private
 const verifyPayment = asyncHandler(async (req, res) => {
@@ -71,22 +70,25 @@ const verifyPayment = asyncHandler(async (req, res) => {
     throw new Error("Invalid payment signature, verification failed");
   }
 
-  // TODO: Save transaction details to MongoDB if you have a Payment model
-  /*
-  await Payment.create({
-    orderId: razorpay_order_id,
-    paymentId: razorpay_payment_id,
-    signature: razorpay_signature,
-    user: req.user._id,
-    status: 'Success'
-  });
-  */
+  // Fetch payment details directly from Razorpay to securely retrieve exact amount and currency
+  const razorpay = getRazorpayInstance();
+  const paymentDetails = await razorpay.payments.fetch(razorpay_payment_id);
+
+  const amountPaid = paymentDetails.amount / 100; // Convert from smallest unit (paise) to major unit
+  const currencyPaid = paymentDetails.currency;
+
+  // Print/Log amount and currency securely on the server
+  console.log(
+    `[Payment Success] Order ID: ${razorpay_order_id} | Payment ID: ${razorpay_payment_id} | Amount: ${amountPaid} ${currencyPaid}`
+  );
 
   res.status(200).json({
     success: true,
     message: "Payment verified successfully",
     paymentId: razorpay_payment_id,
     orderId: razorpay_order_id,
+    amount: amountPaid,
+    currency: currencyPaid,
   });
 });
 
